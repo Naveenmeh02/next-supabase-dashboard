@@ -4,7 +4,7 @@ import AccountForm from "./AccountForm";
 import AdvanceForm from "./AdvanceForm";
 import { cn } from "@/lib/utils";
 
-export default function EditForm() {
+export default function EditForm({isAdmin}:{isAdmin:boolean}) {
 	return (
 		<Tabs defaultValue="basic" className="w-full space-y-5">
 			<TabsList className={cn("grid w-full ", "grid-cols-3")}>
