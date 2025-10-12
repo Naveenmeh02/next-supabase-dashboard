@@ -21,6 +21,7 @@ import { toast } from "@/components/ui/use-toast";
 import { AiOutlineLoading3Quarters } from "react-icons/ai";
 import { cn } from "@/lib/utils";
 import { loginWithEmailAndPassword, signUpWithEmailAndPassword } from "../actions";
+import { Eye, EyeOff } from "lucide-react";
 
 const FormSchema = z.object({
   email: z.string().email("Please enter a valid email address"),
@@ -32,6 +33,7 @@ type AuthMode = 'login' | 'signup';
 export default function AuthForm() {
   const [mode, setMode] = useState<AuthMode>('login');
   const [isPending, setIsPending] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
   const router = useRouter();
 
   const form = useForm<z.infer<typeof FormSchema>>({
@@ -100,7 +102,8 @@ export default function AuthForm() {
         </p>
       </div>
 
-      <div className="bg-card p-6 rounded-lg shadow-md border">
+      <div className="bg-white dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-700 rounded-lg shadow-sm transition-colors duration-300">
+        <div className="p-6">
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
             <FormField
@@ -108,7 +111,7 @@ export default function AuthForm() {
               name="email"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Email</FormLabel>
+                  <FormLabel className="text-sm font-medium text-gray-700 dark:text-gray-300">Email</FormLabel>
                   <FormControl>
                     <Input
                       placeholder="name@example.com"
@@ -117,6 +120,7 @@ export default function AuthForm() {
                       autoComplete="email"
                       autoCorrect="off"
                       disabled={isPending}
+                      className="border-2 border-gray-200 dark:border-gray-700 focus-visible:ring-indigo-500 transition-colors duration-300"
                       {...field}
                     />
                   </FormControl>
@@ -131,24 +135,35 @@ export default function AuthForm() {
               render={({ field }) => (
                 <FormItem>
                   <div className="flex items-center justify-between">
-                    <FormLabel>Password</FormLabel>
+                    <FormLabel className="text-sm font-medium text-gray-700 dark:text-gray-300">Password</FormLabel>
                     {mode === 'login' && (
                       <Link
                         href="/forgot-password"
-                        className="text-sm font-medium text-primary hover:underline"
+                        className="text-sm font-medium text-indigo-600 hover:text-indigo-700 dark:text-indigo-400 dark:hover:text-indigo-300 transition-colors duration-300"
                       >
                         Forgot password?
                       </Link>
                     )}
                   </div>
                   <FormControl>
-                    <Input
-                      type="password"
-                      placeholder="••••••••"
-                      autoComplete={mode === 'login' ? 'current-password' : 'new-password'}
-                      disabled={isPending}
-                      {...field}
-                    />
+                    <div className="relative">
+                      <Input
+                        type={showPassword ? 'text' : 'password'}
+                        placeholder="••••••••"
+                        autoComplete={mode === 'login' ? 'current-password' : 'new-password'}
+                        disabled={isPending}
+                        className="pr-10 border-2 border-gray-200 dark:border-gray-700 focus-visible:ring-indigo-500 transition-colors duration-300"
+                        {...field}
+                      />
+                      <button
+                        type="button"
+                        aria-label={showPassword ? 'Hide password' : 'Show password'}
+                        onClick={() => setShowPassword((v) => !v)}
+                        className="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 transition-colors duration-300"
+                      >
+                        {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                      </button>
+                    </div>
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -157,7 +172,7 @@ export default function AuthForm() {
 
             <Button
               type="submit"
-              className="w-full mt-6"
+              className="w-full mt-6 bg-indigo-600 hover:bg-indigo-700 text-white dark:bg-indigo-500 dark:hover:bg-indigo-600 transition-colors duration-300 rounded-lg"
               disabled={isPending}
             >
               {isPending && (
@@ -175,7 +190,7 @@ export default function AuthForm() {
               <button
                 type="button"
                 onClick={toggleMode}
-                className="font-medium text-primary hover:underline"
+                className="font-medium text-indigo-600 hover:text-indigo-700 hover:underline dark:text-indigo-400 dark:hover:text-indigo-300 transition-colors duration-300"
               >
                 Sign up
               </button>
@@ -186,12 +201,13 @@ export default function AuthForm() {
               <button
                 type="button"
                 onClick={toggleMode}
-                className="font-medium text-primary hover:underline"
+                className="font-medium text-indigo-600 hover:text-indigo-700 hover:underline dark:text-indigo-400 dark:hover:text-indigo-300 transition-colors duration-300"
               >
                 Sign in
               </button>
             </p>
           )}
+        </div>
         </div>
       </div>
     </div>

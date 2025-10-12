@@ -10,7 +10,7 @@ export default async function page() {
 		return redirect("/dashboard");
 	}
 	return (
-		<div className="flex items-center justify-center h-screen">
+		<div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center px-4 py-8 transition-colors duration-300">
 			<AuthForm />
 		</div>
 	);

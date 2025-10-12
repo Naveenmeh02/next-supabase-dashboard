@@ -361,26 +361,26 @@ export default function SettingsPage() {
       </Card>
 
       {/* Danger Zone */}
-      <Card className="border-red-200 dark:border-red-900">
-        <CardHeader>
-          <CardTitle className="text-red-600 dark:text-red-400">Danger Zone</CardTitle>
-          <CardDescription>Actions that affect your account</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="flex items-center justify-between">
-            <div>
-              <h3 className="font-medium">Sign Out</h3>
-              <p className="text-sm text-muted-foreground">
-                Sign out of your account on this device
-              </p>
-            </div>
-            <Button variant="destructive" onClick={handleSignOut}>
-              <LogOut className="mr-2 h-4 w-4" />
-              Sign Out
-            </Button>
-          </div>
-        </CardContent>
-      </Card>
+      <Card className="border-red-200 dark:border-red-900 bg-red-500/10 dark:bg-red-500/10">
+  <CardHeader>
+    <CardTitle className="text-red-600 dark:text-red-400">Danger Zone</CardTitle>
+    <CardDescription>Actions that affect your account</CardDescription>
+  </CardHeader>
+  <CardContent>
+    <div className="flex items-center justify-between">
+      <div>
+        <h3 className="font-medium">Sign Out</h3>
+        <p className="text-sm text-muted-foreground">
+          Sign out of your account on this device
+        </p>
+      </div>
+      <Button variant="destructive" onClick={handleSignOut}>
+        <LogOut className="mr-2 h-4 w-4" />
+        Sign Out
+      </Button>
+    </div>
+  </CardContent>
+</Card>
     </div>
   );
 }
