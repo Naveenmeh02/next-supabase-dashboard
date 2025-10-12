@@ -2,8 +2,6 @@
 
 A modern, responsive dashboard built with Next.js 14, Supabase, and Tailwind CSS. This application provides a comprehensive interface for managing distributors, retailers, inventory, and analytics.
 
-![Dashboard Preview](https://github.com/Chensokheng/next-supabase-dashboard/assets/52232579/8ffea2ac-0200-4bed-b87c-77d162d07b9e)
-
 ## 🚀 Features
 
 - **Modern UI/UX** - Clean, responsive design with dark mode support
