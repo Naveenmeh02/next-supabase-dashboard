@@ -4,7 +4,7 @@ import { cookies } from "next/headers";
 import { createClient } from '@supabase/supabase-js'
 
 
-export async function createSupbaseServerClientReadOnly() {
+export async function createSupabaseServerClientReadOnly() {
 	const cookieStore = cookies();
 
 	return createServerClient(
@@ -20,7 +20,7 @@ export async function createSupbaseServerClientReadOnly() {
 	);
 }
 
-export async function createSupbaseServerClient() {
+export async function createSupabaseServerClient() {
 	const cookieStore = cookies();
 
 	return createServerClient(
@@ -43,7 +43,7 @@ export async function createSupbaseServerClient() {
 }
 
 
-export async function createSupbaseAdmin() {
+export async function createSupabaseAdmin() {
 
 
 	return createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.SERVICE_ROLE!, {

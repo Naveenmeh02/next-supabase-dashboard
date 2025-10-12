@@ -1,30 +1,25 @@
-import React, { ReactNode } from "react";
-import SideNav from "./components/SideNav";
-import ToggleSidebar from "./components/ToggleSidebar";
-import MobileSideNav from "./components/MobileSideNav";
-import { readUserSession } from "@/lib/actions";
-import { redirect } from "next/navigation";
-import { useUserStore } from "@/lib/store/store";
+import { ReactNode } from 'react';
+import { readUserSession } from '@/lib/actions';
+import { redirect } from 'next/navigation';
+import DistributorSidebar from './components/DistributorSidebar';
+import DistributorHeader from './components/DistributorHeader';
 
-export default async function Layout({ children }: { children: ReactNode }) {
-	const { data: userSession } = await readUserSession();
+export default async function DashboardLayout({ children }: { children: ReactNode }) {
+  const { data: userSession } = await readUserSession();
 
-	if (!userSession.session) {
-		return redirect("/auth");
-	}
+  if (!userSession.session) {
+    return redirect('/auth');
+  }
 
-	useUserStore.setState({user:userSession.session.user})
-	return (
-		<div className="w-full flex ">
-			<div className="h-screen flex flex-col">
-				<SideNav />
-				<MobileSideNav />
-			</div>
-
-			<div className="w-full sm:flex-1 p-5 sm:p-10 space-y-5 bg-gray-100 dark:bg-inherit">
-				<ToggleSidebar />
-				{children}
-			</div>
-		</div>
-	);
+  return (
+    <div className="flex h-screen bg-gray-50 dark:bg-gray-900">
+      <DistributorSidebar />
+      <div className="flex flex-col flex-1 overflow-hidden">
+        <DistributorHeader />
+        <main className="flex-1 overflow-y-auto p-4 md:p-6">
+          {children}
+        </main>
+      </div>
+    </div>
+  );
 }

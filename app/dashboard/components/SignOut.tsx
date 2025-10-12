@@ -1,29 +1,55 @@
 "use client";
-import { logout } from "@/app/auth/actions";
+
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import React, { useTransition } from "react";
+import { useRouter } from "next/navigation";
+import { useTransition } from "react";
 import { AiOutlineLoading3Quarters } from "react-icons/ai";
 
-export default function SignOut() {
-	const [isPending, startTransition] = useTransition();
-	const onSubmit = async () => {
-		startTransition(async () => {
-			await logout();
-		});
-	};
+const logout = async () => {
+  const response = await fetch('/api/auth/signout', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+  });
+  
+  if (!response.ok) {
+    throw new Error('Failed to sign out');
+  }
+  
+  return response.json();
+};
 
-	return (
-		<form action={onSubmit}>
-			<Button
-				className="w-full flex items-center gap-2"
-				variant="outline"
-			>
-				SignOut{" "}
-				<AiOutlineLoading3Quarters
-					className={cn(" animate-spin", { hidden: !isPending })}
-				/>
-			</Button>
-		</form>
-	);
+export default function SignOut({ className }: { className?: string }) {
+  const [isPending, startTransition] = useTransition();
+  const router = useRouter();
+
+  const handleSignOut = async () => {
+    startTransition(async () => {
+      try {
+        await logout();
+        router.push('/auth');
+        router.refresh();
+      } catch (error) {
+        console.error('Error signing out:', error);
+      }
+    });
+  };
+
+  return (
+    <form action={handleSignOut}>
+      <Button
+        type="submit"
+        className={cn("w-full flex items-center gap-2", className)}
+        variant="outline"
+        disabled={isPending}
+      >
+        Sign Out
+        <AiOutlineLoading3Quarters
+          className={cn("animate-spin", { hidden: !isPending })}
+        />
+      </Button>
+    </form>
+  );
 }

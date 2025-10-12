@@ -1,7 +1,7 @@
 "use server";
 
 import { readUserSession } from "@/lib/actions";
-import { createSupbaseAdmin, createSupbaseServerClient } from "@/lib/supabase";
+import { createSupabaseAdmin, createSupabaseServerClient } from "@/lib/supabase";
 import { error } from "console";
 import { unstable_noStore } from "next/cache";
 
@@ -19,7 +19,7 @@ export async function createMember(data: {
 
 		return JSON.stringify({error:{message:"you are not allowed	"}})
 	}
-	const supabase = await createSupbaseAdmin()
+	const supabase = await createSupabaseAdmin()
 
 	const createResult = await supabase.auth.admin.createUser({
 		email:data.email,
@@ -55,6 +55,6 @@ export async function updateMemberById(id: string) {
 export async function deleteMemberById(id: string) {}
 export async function readMembers() {
 	unstable_noStore()
-	const supabase = await createSupbaseServerClient()
+	const supabase = await createSupabaseServerClient()
 	return await supabase.from("permission").select("*,member(*)")
 }

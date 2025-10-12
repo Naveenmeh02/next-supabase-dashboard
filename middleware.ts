@@ -54,7 +54,12 @@ export async function middleware(request: NextRequest) {
 		}
 	);
 
-	await supabase.auth.getSession();
+	const { data: { session } } = await supabase.auth.getSession();
+
+	// Redirect authenticated users from /auth to /dashboard
+	if (session && request.nextUrl.pathname === '/auth') {
+		return NextResponse.redirect(new URL('/dashboard', request.url));
+	}
 
 	return response;
 }
