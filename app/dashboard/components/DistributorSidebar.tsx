@@ -6,6 +6,7 @@ import { Home, LineChart, Users, Package, Settings } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import SignOut from './SignOut';
 
+
 const navItems = [
   { name: 'Overview', href: '/dashboard', icon: Home },
   { name: 'Analytics', href: '/dashboard/analytics', icon: LineChart },
@@ -57,7 +58,16 @@ export default function DistributorSidebar() {
               })}
             </nav>
           </div>
-          
+          {/* Check Recommendation Section */}
+          <div className="px-4 py-4 border-t border-gray-200 dark:border-gray-800">
+            <button
+              onClick={() => window.location.href = "http://127.0.0.1:5500/app/test12.html"}
+              className="w-full flex items-center justify-center gap-3 px-4 py-3 border-2 border-indigo-200 dark:border-indigo-900 rounded-lg text-indigo-600 dark:text-indigo-400 text-sm font-medium bg-indigo-50 dark:bg-indigo-950/30 transition-all duration-300 ease-in-out hover:bg-indigo-100 hover:text-indigo-700 hover:border-indigo-300 dark:hover:bg-indigo-950/50 dark:hover:text-indigo-300 dark:hover:border-indigo-800"
+            >
+              Check Recommendation
+            </button>
+          </div>
+
           {/* Sign Out Section */}
           <div className="px-4 py-4 border-t border-gray-200 dark:border-gray-800">
             <SignOut className="w-full flex items-center justify-center gap-3 px-4 py-3 border-2 border-red-200 dark:border-red-900 rounded-lg text-red-600 dark:text-red-400 text-sm font-medium bg-red-50 dark:bg-red-950/30 transition-all duration-300 ease-in-out hover:bg-red-100 hover:text-red-700 hover:border-red-300 dark:hover:bg-red-950/50 dark:hover:text-red-300 dark:hover:border-red-800" />

@@ -1,0 +1,1354 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IntelliTrade B2B Recommendation System - Demo</title>
+    
+    <!-- Google Font - Jost (matching dashboard) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Jost:wght@100;300;400;500;700;900&display=swap" rel="stylesheet">
+    
+    <!-- CDN Libraries -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Jost', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: #f9fafb;
+            color: #1f2937;
+            overflow-x: hidden;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+        
+        @media (prefers-color-scheme: dark) {
+            body {
+                background: #09090B;
+                color: #f3f4f6;
+            }
+        }
+        
+        .container {
+            max-width: 1800px;
+            margin: 0 auto;
+            padding: 32px;
+        }
+        
+        @media (max-width: 768px) {
+            .container {
+                padding: 16px;
+            }
+        }
+        
+        header {
+            background: white;
+            padding: 24px 32px;
+            border-radius: 8px;
+            margin-bottom: 24px;
+            border: 1px solid #e5e7eb;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        @media (prefers-color-scheme: dark) {
+            header {
+                background: #18181b;
+                border-color: #27272a;
+            }
+        }
+        
+        header h1 {
+            color: #1f2937;
+            font-size: 28px;
+            font-weight: 700;
+        }
+        
+        @media (prefers-color-scheme: dark) {
+            header h1 {
+                color: #f3f4f6;
+            }
+        }
+        
+        header p {
+            color: #6b7280;
+        }
+        
+        @media (prefers-color-scheme: dark) {
+            header p {
+                color: #9ca3af;
+            }
+        }
+        
+        .demo-toggle {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .demo-toggle span {
+            color: #374151;
+        }
+        
+        @media (prefers-color-scheme: dark) {
+            .demo-toggle span {
+                color: #d1d5db;
+            }
+        }
+        
+        .toggle-switch {
+            position: relative;
+            width: 60px;
+            height: 30px;
+            background: #ccc;
+            border-radius: 15px;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+        
+        .toggle-switch.active {
+            background: #4f46e5;
+        }
+        
+        .toggle-slider {
+            position: absolute;
+            top: 3px;
+            left: 3px;
+            width: 24px;
+            height: 24px;
+            background: white;
+            border-radius: 50%;
+            transition: transform 0.3s;
+        }
+        
+        .toggle-switch.active .toggle-slider {
+            transform: translateX(30px);
+        }
+        
+        .main-content {
+            display: grid;
+            grid-template-columns: 300px 1fr 400px;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+        
+        .panel {
+            background: white;
+            padding: 24px;
+            border-radius: 8px;
+            border: 1px solid #e5e7eb;
+        }
+        
+        @media (prefers-color-scheme: dark) {
+            .panel {
+                background: #18181b;
+                border-color: #27272a;
+            }
+        }
+        
+        .panel h2 {
+            color: #1f2937;
+            margin-bottom: 20px;
+            font-size: 18px;
+            font-weight: 700;
+            border-bottom: 1px solid #e5e7eb;
+            padding-bottom: 12px;
+        }
+        
+        @media (prefers-color-scheme: dark) {
+            .panel h2 {
+                color: #f3f4f6;
+                border-bottom-color: #27272a;
+            }
+        }
+        
+        .form-group {
+            margin-bottom: 15px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            font-size: 14px;
+            color: #374151;
+        }
+        
+        @media (prefers-color-scheme: dark) {
+            .form-group label {
+                color: #d1d5db;
+            }
+        }
+        
+        .form-group input, .form-group select {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid #d1d5db;
+            border-radius: 6px;
+            font-size: 14px;
+            font-family: inherit;
+            background: white;
+            color: #1f2937;
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+        
+        .form-group input:focus, .form-group select:focus {
+            outline: none;
+            border-color: #4f46e5;
+            box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+        }
+        
+        @media (prefers-color-scheme: dark) {
+            .form-group input, .form-group select {
+                background: #09090B;
+                border-color: #3f3f46;
+                color: #f3f4f6;
+            }
+            
+            .form-group input:focus, .form-group select:focus {
+                border-color: #6366f1;
+                box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+            }
+        }
+        
+        .slider-group {
+            margin-bottom: 15px;
+        }
+        
+        .slider-group label {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 5px;
+            font-size: 13px;
+        }
+        
+        .slider-group input[type="range"] {
+            width: 100%;
+        }
+        
+        button {
+            width: 100%;
+            padding: 12px 16px;
+            background: #4f46e5;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            font-family: inherit;
+            margin-top: 12px;
+            transition: all 0.2s;
+        }
+        
+        button:hover {
+            background: #4338ca;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 6px rgba(79, 70, 229, 0.2);
+        }
+        
+        button:active {
+            transform: translateY(0);
+        }
+        
+        button.secondary {
+            background: #6b7280;
+            border: 1px solid #d1d5db;
+        }
+        
+        button.secondary:hover {
+            background: #4b5563;
+            box-shadow: 0 4px 6px rgba(107, 114, 128, 0.2);
+        }
+        
+        @media (prefers-color-scheme: dark) {
+            button {
+                background: #6366f1;
+            }
+            
+            button:hover {
+                background: #4f46e5;
+            }
+            
+            button.secondary {
+                background: #3f3f46;
+                border-color: #52525b;
+            }
+            
+            button.secondary:hover {
+                background: #52525b;
+            }
+        }
+        
+        .location-info {
+            background: #eff6ff;
+            padding: 12px;
+            border-radius: 6px;
+            font-size: 12px;
+            margin-bottom: 16px;
+            border: 1px solid #dbeafe;
+        }
+        
+        @media (prefers-color-scheme: dark) {
+            .location-info {
+                background: #1e293b;
+                border-color: #334155;
+            }
+        }
+        
+        .product-card {
+            background: #f9fafb;
+            padding: 16px;
+            border-radius: 8px;
+            margin-bottom: 12px;
+            border: 1px solid #e5e7eb;
+            border-left: 3px solid #4f46e5;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .product-card:hover {
+            transform: translateX(4px);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+            border-left-color: #4338ca;
+        }
+        
+        .product-card.selected {
+            background: #eef2ff;
+            border-left-color: #4338ca;
+            border-color: #c7d2fe;
+        }
+        
+        @media (prefers-color-scheme: dark) {
+            .product-card {
+                background: #18181b;
+                border-color: #27272a;
+                border-left-color: #6366f1;
+            }
+            
+            .product-card:hover {
+                border-left-color: #4f46e5;
+                box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+            }
+            
+            .product-card.selected {
+                background: #1e1b4b;
+                border-left-color: #4f46e5;
+                border-color: #3730a3;
+            }
+        }
+        
+        .product-card h3 {
+            color: #1f2937;
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+        
+        @media (prefers-color-scheme: dark) {
+            .product-card h3 {
+                color: #f3f4f6;
+            }
+        }
+        
+        .product-meta {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+            font-size: 12px;
+            color: #6b7280;
+        }
+        
+        @media (prefers-color-scheme: dark) {
+            .product-meta {
+                color: #9ca3af;
+            }
+        }
+        
+        .product-meta span {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        
+        .score-badge {
+            background: #4f46e5;
+            color: white;
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: 600;
+        }
+        
+        @media (prefers-color-scheme: dark) {
+            .score-badge {
+                background: #6366f1;
+            }
+        }
+        
+        .chart-container {
+            height: 200px;
+            margin-bottom: 20px;
+        }
+        
+        #map {
+            height: 300px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+        
+        .scrape-log {
+            background: #0f172a;
+            color: #22c55e;
+            padding: 16px;
+            border-radius: 8px;
+            font-family: 'Courier New', 'Monaco', monospace;
+            font-size: 12px;
+            max-height: 200px;
+            overflow-y: auto;
+            margin-top: 12px;
+            border: 1px solid #1e293b;
+        }
+        
+        @media (prefers-color-scheme: dark) {
+            .scrape-log {
+                background: #020617;
+                border-color: #0f172a;
+            }
+        }
+        
+        .scrape-log .log-line {
+            margin-bottom: 5px;
+            opacity: 0;
+            animation: fadeIn 0.3s forwards;
+        }
+        
+        @keyframes fadeIn {
+            to { opacity: 1; }
+        }
+        
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: #e5e7eb;
+            border-radius: 4px;
+            overflow: hidden;
+            margin: 10px 0;
+        }
+        
+        @media (prefers-color-scheme: dark) {
+            .progress-bar {
+                background: #27272a;
+            }
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #4f46e5, #6366f1);
+            width: 0;
+            transition: width 0.5s;
+        }
+        
+        .narration-box {
+            background: #fef3c7;
+            padding: 16px;
+            border-radius: 8px;
+            border: 1px solid #fbbf24;
+            margin-top: 20px;
+            font-size: 13px;
+            line-height: 1.6;
+            color: #92400e;
+        }
+        
+        @media (prefers-color-scheme: dark) {
+            .narration-box {
+                background: #422006;
+                border-color: #78350f;
+                color: #fde68a;
+            }
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        
+        .stat-box {
+            background: linear-gradient(135deg, #4f46e5, #6366f1);
+            color: white;
+            padding: 20px;
+            border-radius: 8px;
+            text-align: center;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .stat-box .number {
+            font-size: 24px;
+            font-weight: 700;
+            margin-bottom: 5px;
+        }
+        
+        .stat-box .label {
+            font-size: 12px;
+            opacity: 0.9;
+        }
+        
+        .opportunity-badge {
+            background: #10b981;
+            color: white;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 10px;
+            margin-left: 5px;
+        }
+        
+        @media (max-width: 1400px) {
+            .main-content {
+                grid-template-columns: 280px 1fr;
+            }
+            
+            .visualizations-panel {
+                grid-column: 1 / -1;
+            }
+        }
+    </style>
+</head>
+<body>
+<!--
+╔══════════════════════════════════════════════════════════════════════════════╗
+║                    IntelliTrade B2B Recommendation System                    ║
+║                              DEMO INSTRUCTIONS                                ║
+╚══════════════════════════════════════════════════════════════════════════════╝
+
+HOW TO USE:
+1. Save this file as "intellitrade-demo.html"
+2. Open in a modern web browser (Chrome, Firefox, Edge)
+3. Allow location access when prompted (or it will use IP-based fallback)
+4. Click "Demo Mode" toggle for automated presentation flow
+5. Use manual controls to adjust filters and weights
+6. Click products to see details on map and charts
+7. Use "Export Snapshot" to save recommendations as image
+
+RECORDING TIPS:
+- Start with Demo Mode OFF to show manual control
+- Toggle Demo Mode ON for smooth automated walkthrough
+- Read from the narration box during recording
+- Click "Simulate Scrape" to show competitive analysis
+- Highlight interactive elements (sliders, product selection)
+- Use Export Snapshot for presentation slides
+
+FEATURES DEMONSTRATED:
+✓ Real-time geolocation (browser + IP fallback)
+✓ Multi-factor recommendation scoring algorithm
+✓ Web scraping simulation with price comparison
+✓ Interactive data visualizations (charts + map)
+✓ Market trend analysis and competitive intelligence
+✓ Export functionality for reporting
+
+-->
+
+<div class="container">
+    <header>
+        <div>
+            <h1>🚀 IntelliTrade B2B Recommendation System</h1>
+            <p style="font-size: 14px; margin-top: 5px;">Intelligent product recommendations powered by multi-factor analysis</p>
+        </div>
+        <div class="demo-toggle">
+            <span style="font-weight: 600;">Demo Mode</span>
+            <div class="toggle-switch" id="demoToggle">
+                <div class="toggle-slider"></div>
+            </div>
+        </div>
+    </header>
+    
+    <div class="main-content">
+        <!-- Left Panel: Controls -->
+        <div class="panel controls-panel">
+            <h2>🎯 Controls</h2>
+            
+            <div class="location-info" id="locationInfo">
+                <strong>📍 Location:</strong><br>
+                <span id="locationText">Detecting...</span><br>
+                <small id="locationSource">Source: Detecting...</small>
+            </div>
+            
+            <div class="form-group">
+                <label>🔍 Search Product</label>
+                <input type="text" id="searchInput" placeholder="Enter product keyword...">
+            </div>
+            
+            <div class="form-group">
+                <label>📂 Category</label>
+                <select id="categoryFilter">
+                    <option value="">All Categories</option>
+                    <option value="Electronics">Electronics</option>
+                    <option value="Furniture">Furniture</option>
+                    <option value="Hardware">Hardware</option>
+                    <option value="Textiles">Textiles</option>
+                    <option value="Food">Food & Beverage</option>
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label>💰 Price Range</label>
+                <div style="display: flex; gap: 8px;">
+                    <input type="number" id="minPrice" placeholder="Min" style="flex: 1;">
+                    <input type="number" id="maxPrice" placeholder="Max" style="flex: 1;">
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <label>📏 Max Distance (km)</label>
+                <input type="number" id="maxDistance" value="100" min="1">
+            </div>
+            
+            <h2 style="margin-top: 20px;">⚖️ Scoring Weights</h2>
+            
+            <div class="slider-group">
+                <label>
+                    <span>Distance</span>
+                    <span id="distanceWeight">25%</span>
+                </label>
+                <input type="range" id="distanceSlider" min="0" max="100" value="25">
+            </div>
+            
+            <div class="slider-group">
+                <label>
+                    <span>Price</span>
+                    <span id="priceWeight">30%</span>
+                </label>
+                <input type="range" id="priceSlider" min="0" max="100" value="30">
+            </div>
+            
+            <div class="slider-group">
+                <label>
+                    <span>Trend</span>
+                    <span id="trendWeight">25%</span>
+                </label>
+                <input type="range" id="trendSlider" min="0" max="100" value="25">
+            </div>
+            
+            <div class="slider-group">
+                <label>
+                    <span>Rating</span>
+                    <span id="ratingWeight">20%</span>
+                </label>
+                <input type="range" id="ratingSlider" min="0" max="100" value="20">
+            </div>
+            
+            <button onclick="computeRecommendations()">🔄 Update Recommendations</button>
+            <button class="secondary" onclick="simulateScrape()">🌐 Simulate Scrape Competitors</button>
+            <button class="secondary" onclick="exportSnapshot()">📸 Export Snapshot</button>
+        </div>
+        
+        <!-- Center Panel: Recommendations -->
+        <div class="panel recommendations-panel" id="recommendationsPanel">
+            <h2>⭐ Top Recommendations</h2>
+            
+            <div class="progress-bar" id="progressBar" style="display: none;">
+                <div class="progress-fill" id="progressFill"></div>
+            </div>
+            
+            <div class="stats-grid" id="statsGrid">
+                <div class="stat-box">
+                    <div class="number" id="totalProducts">0</div>
+                    <div class="label">Products Analyzed</div>
+                </div>
+                <div class="stat-box">
+                    <div class="number" id="avgScore">0</div>
+                    <div class="label">Avg Score</div>
+                </div>
+            </div>
+            
+            <div id="recommendationsList"></div>
+            
+            <div id="scrapeLog" style="display: none;">
+                <h3 style="margin-top: 20px; color: #4f46e5; font-weight: 600;">🕷️ Scraping Activity Log</h3>
+                <div class="scrape-log" id="scrapeLogContent"></div>
+            </div>
+            
+            <div class="narration-box">
+                <strong>❓ Need Help ? :</strong><br>
+                "IntelliTrade analyzes multiple factors—distance, price, market trends, and ratings—to recommend the best B2B suppliers for retailers. Our advanced algorithm processes real-time data, simulates competitor web scraping, and visualizes market opportunities on an interactive map."
+            </div>
+        </div>
+        
+        <!-- Right Panel: Visualizations -->
+        <div class="panel visualizations-panel">
+            <h2>📊 Market Analysis</h2>
+            
+            <div id="map"></div>
+            
+            <h3 style="color: #4f46e5; margin-bottom: 10px; font-size: 14px; font-weight: 600;">Price Distribution</h3>
+            <div class="chart-container">
+                <canvas id="priceChart"></canvas>
+            </div>
+            
+            <h3 style="color: #4f46e5; margin-bottom: 10px; font-size: 14px; font-weight: 600;">Trend Timeline (Selected Product)</h3>
+            <div class="chart-container">
+                <canvas id="trendChart"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// ============================================================================
+// MOCK DATA: Products Dataset (50 products across categories)
+// ============================================================================
+const MOCK_PRODUCTS = [
+    {id: 1, name: "Samsung 55\" Smart TV", category: "Electronics", price: 45000, rating: 4.5, trend_score: 85, seller_lat: 12.9716, seller_lon: 77.5946, seller_name: "Tech Distributors Bangalore"},
+    {id: 2, name: "LG Refrigerator 260L", category: "Electronics", price: 28000, rating: 4.2, trend_score: 72, seller_lat: 13.0827, seller_lon: 80.2707, seller_name: "Chennai Appliances"},
+    {id: 3, name: "Office Desk Chair Premium", category: "Furniture", price: 12000, rating: 4.8, trend_score: 68, seller_lat: 12.2958, seller_lon: 76.6394, seller_name: "Mysore Furniture Co"},
+    {id: 4, name: "Conference Table 8-Seater", category: "Furniture", price: 35000, rating: 4.6, trend_score: 55, seller_lat: 12.9141, seller_lon: 74.8560, seller_name: "Mangalore Wood Works"},
+    {id: 5, name: "Dell Latitude Laptop", category: "Electronics", price: 55000, rating: 4.7, trend_score: 92, seller_lat: 12.9716, seller_lon: 77.5946, seller_name: "Bangalore IT Hub"},
+    {id: 6, name: "Industrial Power Drill", category: "Hardware", price: 8500, rating: 4.3, trend_score: 61, seller_lat: 13.0827, seller_lon: 80.2707, seller_name: "Chennai Tools Depot"},
+    {id: 7, name: "Cotton Fabric Rolls", category: "Textiles", price: 3500, rating: 4.1, trend_score: 58, seller_lat: 11.0168, seller_lon: 76.9558, seller_name: "Coimbatore Textiles"},
+    {id: 8, name: "Industrial Sewing Machine", category: "Hardware", price: 42000, rating: 4.4, trend_score: 64, seller_lat: 12.9141, seller_lon: 74.8560, seller_name: "Mangalore Machines"},
+    {id: 10, name: "HP Laser Printer A3", category: "Electronics", price: 32000, rating: 4.5, trend_score: 75, seller_lat: 12.9716, seller_lon: 77.5946, seller_name: "Bangalore Office Solutions"},
+    {id: 11, name: "Steel Shelving Units", category: "Furniture", price: 15000, rating: 4.2, trend_score: 52, seller_lat: 13.0827, seller_lon: 80.2707, seller_name: "Chennai Steel Works"},
+    {id: 12, name: "LED Strip Lights 50m", category: "Electronics", price: 4500, rating: 4.0, trend_score: 70, seller_lat: 12.9141, seller_lon: 74.8560, seller_name: "Coastal Lighting"},
+    {id: 13, name: "Spice Packets Bulk", category: "Food", price: 12000, rating: 4.6, trend_score: 82, seller_lat: 11.0168, seller_lon: 76.9558, seller_name: "Coimbatore Spice Traders"},
+    {id: 14, name: "Leather Sofa Set", category: "Furniture", price: 65000, rating: 4.7, trend_score: 48, seller_lat: 12.9716, seller_lon: 77.5946, seller_name: "Bangalore Premium Furniture"},
+    {id: 15, name: "Industrial Air Compressor", category: "Hardware", price: 38000, rating: 4.5, trend_score: 66, seller_lat: 13.0827, seller_lon: 80.2707, seller_name: "Chennai Industrial Supply"},
+    {id: 16, name: "Wireless Router Enterprise", category: "Electronics", price: 15000, rating: 4.4, trend_score: 78, seller_lat: 12.9716, solver_lon: 77.5946, seller_name: "Tech Networks Bangalore"},
+    {id: 17, name: "Office Cubicle Partition", category: "Furniture", price: 22000, rating: 4.1, trend_score: 45, seller_lat: 12.2958, seller_lon: 76.6394, seller_name: "Mysore Office Interiors"},
+    {id: 18, name: "Microwave Oven Commercial", category: "Electronics", price: 18000, rating: 4.3, trend_score: 71, seller_lat: 12.9141, seller_lon: 74.8560, seller_name: "Mangalore Kitchen Equipment"},
+    {id: 19, name: "Organic Tea Leaves 25kg", category: "Food", price: 15000, rating: 4.8, trend_score: 86, seller_lat: 11.0168, seller_lon: 76.9558, seller_name: "Nilgiri Tea Co"},
+    {id: 20, name: "Security Camera System", category: "Electronics", price: 28000, rating: 4.6, trend_score: 89, seller_lat: 13.0827, seller_lon: 80.2707, seller_name: "Chennai Security Solutions"},
+    {id: 21, name: "Modular Kitchen Cabinets", category: "Furniture", price: 48000, rating: 4.5, trend_score: 62, seller_lat: 12.9716, seller_lon: 77.5946, seller_name: "Bangalore Modular Homes"},
+    {id: 22, name: "Angle Grinder Professional", category: "Hardware", price: 6500, rating: 4.2, trend_score: 57, seller_lat: 12.9141, seller_lon: 77.5946, seller_name: "Mangalore Tools"},
+    {id: 23, name: "Silk Fabric Premium", category: "Textiles", price: 8500, rating: 4.7, trend_score: 73, seller_lat: 12.2958, seller_lon: 76.6394, seller_name: "Mysore Silk House"},
+    {id: 24, name: "Industrial Mixer 50L", category: "Hardware", price: 45000, rating: 4.4, trend_score: 59, seller_lat: 13.0827, seller_lon: 80.2707, seller_name: "Chennai Food Processing"},
+    {id: 25, name: "Rice Bulk 1000kg", category: "Food", price: 32000, rating: 4.3, trend_score: 76, seller_lat: 11.0168, seller_lon: 76.9558, seller_name: "Coimbatore Grain Traders"},
+    {id: 26, name: "Sony Sound System", category: "Electronics", price: 35000, rating: 4.6, trend_score: 81, seller_lat: 12.9716, seller_lon: 77.5946, seller_name: "Bangalore Audio Solutions"},
+    {id: 27, name: "Executive Office Table", category: "Furniture", price: 28000, rating: 4.5, trend_score: 50, seller_lat: 12.9141, seller_lon: 74.8560, seller_name: "Coastal Office Furniture"},
+    {id: 28, name: "Cordless Screwdriver Set", category: "Hardware", price: 5500, rating: 4.1, trend_score: 54, seller_lat: 13.0827, seller_lon: 80.2707, seller_name: "Chennai Hardware Store"},
+    {id: 29, name: "Water Purifier Commercial", category: "Electronics", price: 25000, rating: 4.4, trend_score: 74, seller_lat: 12.2958, seller_lon: 76.6394, seller_name: "Mysore Water Solutions"},
+    {id: 30, name: "Hotel Bedding Bulk", category: "Textiles", price: 22000, rating: 4.2, trend_score: 65, seller_lat: 11.0168, seller_lon: 76.9558, seller_name: "Coimbatore Hotel Suppliers"},
+    {id: 31, name: "iPad Pro 12.9 Bulk", category: "Electronics", price: 85000, rating: 4.8, trend_score: 94, seller_lat: 12.9716, seller_lon: 77.5946, seller_name: "Bangalore Apple Store"},
+    {id: 32, name: "Lounge Chair Designer", category: "Furniture", price: 18000, rating: 4.6, trend_score: 47, seller_lat: 13.0827, seller_lon: 80.2707, seller_name: "Chennai Modern Furniture"},
+    {id: 33, name: "Industrial Vacuum Cleaner", category: "Hardware", price: 32000, rating: 4.3, trend_score: 60, seller_lat: 12.9141, seller_lon: 74.8560, seller_name: "Mangalore Cleaning Equipment"},
+    {id: 35, name: "Canon DSLR Camera Kit", category: "Electronics", price: 68000, rating: 4.7, trend_score: 87, seller_lat: 12.9716, seller_lon: 77.5946, seller_name: "Bangalore Photography Hub"},
+    {id: 36, name: "Restaurant Chairs Set", category: "Furniture", price: 24000, rating: 4.4, trend_score: 53, seller_lat: 11.0168, seller_lon: 76.9558, seller_name: "Coimbatore Restaurant Supply"},
+    {id: 37, name: "Welding Machine Industrial", category: "Hardware", price: 28000, rating: 4.5, trend_score: 63, seller_lat: 13.0827, seller_lon: 80.2707, seller_name: "Chennai Welding Solutions"},
+    {id: 38, name: "Cotton Shirts Bulk 100pc", category: "Textiles", price: 18000, rating: 4.2, trend_score: 69, seller_lat: 12.9141, seller_lon: 74.8560, seller_name: "Mangalore Garment Factory"},
+    {id: 39, name: "Projector Full HD", category: "Electronics", price: 42000, rating: 4.6, trend_score: 79, seller_lat: 12.2958, seller_lon: 76.6394, seller_name: "Mysore AV Solutions"},
+    {id: 40, name: "File Cabinet Steel 4-Drawer", category: "Furniture", price: 12000, rating: 4.1, trend_score: 44, seller_lat: 12.9716, seller_lon: 77.5946, seller_name: "Bangalore Office Furniture"},
+    {id: 41, name: "Pressure Washer Industrial", category: "Hardware", price: 22000, rating: 4.4, trend_score: 58, seller_lat: 13.0827, seller_lon: 80.2707, seller_name: "Chennai Cleaning Systems"},
+    {id: 42, name: "Biscuit Packets Wholesale", category: "Food", price: 8500, rating: 4.3, trend_score: 77, seller_lat: 11.0168, seller_lon: 76.9558, seller_name: "Coimbatore Snack Distributors"},
+    {id: 43, name: "Air Conditioner 2-Ton", category: "Electronics", price: 38000, rating: 4.5, trend_score: 83, seller_lat: 12.9141, seller_lon: 74.8560, seller_name: "Mangalore Cool Solutions"},
+    {id: 44, name: "Reception Desk Modern", category: "Furniture", price: 32000, rating: 4.7, trend_score: 51, seller_lat: 12.9716, seller_lon: 77.5946, seller_name: "Bangalore Corporate Interiors"},
+    {id: 45, name: "Pneumatic Tools Set", category: "Hardware", price: 18000, rating: 4.2, trend_score: 56, seller_lat: 12.2958, seller_lon: 76.6394, seller_name: "Mysore Industrial Tools"},
+    {id: 46, name: "Honey Organic 25kg", category: "Food", price: 15000, rating: 4.8, trend_score: 90, seller_lat: 13.0827, seller_lon: 80.2707, seller_name: "Chennai Bee Farms"},
+    {id: 47, name: "Smart Watch Bulk 50pc", category: "Electronics", price: 125000, rating: 4.4, trend_score: 93, seller_lat: 12.9716, seller_lon: 77.5946, seller_name: "Bangalore Wearables"},
+    {id: 48, name: "Bar Stools Set of 4", category: "Furniture", price: 16000, rating: 4.3, trend_score: 49, seller_lat: 11.0168, seller_lon: 76.9558, seller_name: "Coimbatore Bar Furniture"},
+    {id: 49, name: "Hydraulic Jack 10-Ton", category: "Hardware", price: 12000, rating: 4.5, trend_score: 62, seller_lat: 12.9141, seller_lon: 74.8560, seller_name: "Mangalore Auto Tools"},
+    {id: 50, name: "Frozen Vegetables 100kg", category: "Food", price: 18000, rating: 4.6, trend_score: 84, seller_lat: 13.0827, seller_lon: 80.2707, seller_name: "Chennai Cold Storage"}
+];
+
+// Simulated scraped data from competitor sites
+const SCRAPED_PRODUCTS = [
+    {id: 101, name: "Samsung 55\" Smart TV", category: "Electronics", price: 42000, rating: 4.4, trend_score: 85, seller_lat: 12.8, seller_lon: 77.6, seller_name: "Online Competitor A", scraped: true},
+    {id: 102, name: "Dell Latitude Laptop", category: "Electronics", price: 52000, rating: 4.6, trend_score: 92, seller_lat: 13.1, seller_lon: 77.5, seller_name: "Online Competitor B", scraped: true},
+    {id: 103, name: "Coffee Beans Bulk 50kg", category: "Food", price: 16500, rating: 4.8, trend_score: 88, seller_lat: 12.3, seller_lon: 76.7, seller_name: "Online Competitor C", scraped: true},
+    {id: 104, name: "iPad Pro 12.9 Bulk", category: "Electronics", price: 82000, rating: 4.7, trend_score: 94, seller_lat: 12.95, seller_lon: 77.65, seller_name: "Online Competitor D", scraped: true},
+    {id: 105, name: "Cashew Nuts Bulk 50kg", category: "Food", price: 40000, rating: 4.9, trend_score: 91, seller_lat: 12.25, seller_lon: 76.55, seller_name: "Online Competitor E", scraped: true}
+];
+
+// ============================================================================
+// GLOBAL STATE
+// ============================================================================
+let retailerLocation = {lat: 12.9141, lon: 74.8560}; // Default: Mangaluru
+let locationSource = "default";
+let allProducts = [...MOCK_PRODUCTS];
+let currentRecommendations = [];
+let selectedProductId = null;
+let map = null;
+let priceChart = null;
+let trendChart = null;
+let demoMode = false;
+let scrapedDataMerged = false;
+
+// ============================================================================
+// INITIALIZATION
+// ============================================================================
+window.onload = function() {
+    initializeLocation();
+    initializeEventListeners();
+    initializeMap();
+    initializeCharts();
+    computeRecommendations();
+};
+
+// ============================================================================
+// GEOLOCATION: Browser first, then IP fallback
+// ============================================================================
+function initializeLocation() {
+    if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(
+            (position) => {
+                retailerLocation = {
+                    lat: position.coords.latitude,
+                    lon: position.coords.longitude
+                };
+                locationSource = "browser geolocation";
+                updateLocationDisplay();
+                if (map) {
+                    map.setView([retailerLocation.lat, retailerLocation.lon], 8);
+                }
+            },
+            (error) => {
+                // Fallback to IP-based geolocation
+                fetchIPLocation();
+            }
+        );
+    } else {
+        fetchIPLocation();
+    }
+}
+
+function fetchIPLocation() {
+    // Using ipapi.co free service for IP-based geolocation
+    fetch('https://ipapi.co/json/')
+        .then(response => response.json())
+        .then(data => {
+            retailerLocation = {
+                lat: data.latitude || 12.9141,
+                lon: data.longitude || 74.8560
+            };
+            locationSource = "IP-based (fallback)";
+            updateLocationDisplay();
+            if (map) {
+                map.setView([retailerLocation.lat, retailerLocation.lon], 8);
+            }
+        })
+        .catch(error => {
+            console.error("IP location fetch failed:", error);
+            locationSource = "default (Mangaluru)";
+            updateLocationDisplay();
+        });
+}
+
+function updateLocationDisplay() {
+    document.getElementById('locationText').textContent = 
+        `${retailerLocation.lat.toFixed(4)}, ${retailerLocation.lon.toFixed(4)}`;
+    document.getElementById('locationSource').textContent = 
+        `Source: ${locationSource}`;
+}
+
+// ============================================================================
+// EVENT LISTENERS
+// ============================================================================
+function initializeEventListeners() {
+    // Demo mode toggle
+    document.getElementById('demoToggle').addEventListener('click', toggleDemoMode);
+    
+    // Weight sliders
+    ['distance', 'price', 'trend', 'rating'].forEach(type => {
+        document.getElementById(`${type}Slider`).addEventListener('input', function() {
+            document.getElementById(`${type}Weight`).textContent = this.value + '%';
+        });
+    });
+    
+    // Search and filters
+    document.getElementById('searchInput').addEventListener('input', computeRecommendations);
+    document.getElementById('categoryFilter').addEventListener('change', computeRecommendations);
+    document.getElementById('minPrice').addEventListener('input', computeRecommendations);
+    document.getElementById('maxPrice').addEventListener('input', computeRecommendations);
+    document.getElementById('maxDistance').addEventListener('change', computeRecommendations);
+}
+
+// ============================================================================
+// DEMO MODE: Automated presentation flow
+// ============================================================================
+function toggleDemoMode() {
+    const toggle = document.getElementById('demoToggle');
+    demoMode = !demoMode;
+    toggle.classList.toggle('active');
+    
+    if (demoMode) {
+        runDemoSequence();
+    }
+}
+
+async function runDemoSequence() {
+    if (!demoMode) return;
+    
+    // Step 1: Show location detection
+    showProgress(20);
+    await sleep(1000);
+    
+    // Step 2: Compute recommendations
+    showProgress(50);
+    computeRecommendations();
+    await sleep(2000);
+    
+    // Step 3: Simulate scraping
+    showProgress(75);
+    simulateScrape();
+    await sleep(3000);
+    
+    // Step 4: Select a product to show visualizations
+    showProgress(100);
+    if (currentRecommendations.length > 0) {
+        selectProduct(currentRecommendations[0].id);
+    }
+    await sleep(1000);
+    
+    hideProgress();
+}
+
+function showProgress(percent) {
+    document.getElementById('progressBar').style.display = 'block';
+    document.getElementById('progressFill').style.width = percent + '%';
+}
+
+function hideProgress() {
+    setTimeout(() => {
+        document.getElementById('progressBar').style.display = 'none';
+        document.getElementById('progressFill').style.width = '0%';
+    }, 500);
+}
+
+function sleep(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+// ============================================================================
+// HAVERSINE DISTANCE CALCULATION (in kilometers)
+// ============================================================================
+function haversineDistance(lat1, lon1, lat2, lon2) {
+    const R = 6371; // Earth's radius in km
+    const dLat = (lat2 - lat1) * Math.PI / 180;
+    const dLon = (lon2 - lon1) * Math.PI / 180;
+    const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+              Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+              Math.sin(dLon/2) * Math.sin(dLon/2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+    return R * c;
+}
+
+// ============================================================================
+// RECOMMENDATION ENGINE: Multi-factor scoring algorithm
+// ============================================================================
+function computeRecommendations() {
+    // Get filter values
+    const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+    const category = document.getElementById('categoryFilter').value;
+    const minPrice = parseFloat(document.getElementById('minPrice').value) || 0;
+    const maxPrice = parseFloat(document.getElementById('maxPrice').value) || Infinity;
+    const maxDistance = parseFloat(document.getElementById('maxDistance').value) || 100;
+    
+    // Get weight values (normalized to sum to 1)
+    const weights = {
+        distance: parseFloat(document.getElementById('distanceSlider').value) / 100,
+        price: parseFloat(document.getElementById('priceSlider').value) / 100,
+        trend: parseFloat(document.getElementById('trendSlider').value) / 100,
+        rating: parseFloat(document.getElementById('ratingSlider').value) / 100
+    };
+    
+    // Filter products
+    let filtered = allProducts.filter(product => {
+        const matchesSearch = !searchTerm || product.name.toLowerCase().includes(searchTerm);
+        const matchesCategory = !category || product.category === category;
+        const matchesPrice = product.price >= minPrice && product.price <= maxPrice;
+        const distance = haversineDistance(
+            retailerLocation.lat, retailerLocation.lon,
+            product.seller_lat, product.seller_lon
+        );
+        const matchesDistance = distance <= maxDistance;
+        
+        return matchesSearch && matchesCategory && matchesPrice && matchesDistance;
+    });
+    
+    // Calculate scores for each product
+    const maxDistance_all = Math.max(...filtered.map(p => 
+        haversineDistance(retailerLocation.lat, retailerLocation.lon, p.seller_lat, p.seller_lon)
+    ));
+    const minPrice_all = Math.min(...filtered.map(p => p.price));
+    const maxPrice_all = Math.max(...filtered.map(p => p.price));
+    
+    filtered = filtered.map(product => {
+        const distance = haversineDistance(
+            retailerLocation.lat, retailerLocation.lon,
+            product.seller_lat, product.seller_lon
+        );
+        
+        // Normalize scores to 0-1 range
+        // Distance: closer is better (inverse)
+        const distance_score = maxDistance_all > 0 ? 1 - (distance / maxDistance_all) : 1;
+        
+        // Price: lower is better (inverse)
+        const price_score = maxPrice_all > minPrice_all ? 
+            1 - ((product.price - minPrice_all) / (maxPrice_all - minPrice_all)) : 1;
+        
+        // Trend: higher is better (direct)
+        const trend_score = product.trend_score / 100;
+        
+        // Rating: higher is better (direct)
+        const rating_score = product.rating / 5;
+        
+        // Calculate weighted final score
+        const final_score = (
+            distance_score * weights.distance +
+            price_score * weights.price +
+            trend_score * weights.trend +
+            rating_score * weights.rating
+        );
+        
+        return {
+            ...product,
+            distance,
+            distance_score,
+            price_score,
+            trend_score: trend_score,
+            rating_score,
+            final_score
+        };
+    });
+    
+    // Sort by final score (descending) and take top 10
+    filtered.sort((a, b) => b.final_score - a.final_score);
+    currentRecommendations = filtered.slice(0, 10);
+    
+    // Update UI
+    displayRecommendations();
+    updateStats(filtered.length);
+    updateMap();
+    updateCharts();
+}
+
+// ============================================================================
+// DISPLAY RECOMMENDATIONS
+// ============================================================================
+function displayRecommendations() {
+    const container = document.getElementById('recommendationsList');
+    
+    if (currentRecommendations.length === 0) {
+        container.innerHTML = '<p style="color: #666; text-align: center; padding: 20px;">No products found matching your criteria.</p>';
+        return;
+    }
+    
+    container.innerHTML = currentRecommendations.map((product, index) => `
+        <div class="product-card ${selectedProductId === product.id ? 'selected' : ''}" 
+             onclick="selectProduct(${product.id})">
+            <h3>${index + 1}. ${product.name} ${product.scraped ? '<span class="opportunity-badge">SCRAPED</span>' : ''}</h3>
+            <div class="product-meta">
+                <span>🏪 ${product.seller_name}</span>
+                <span>💰 ₹${product.price.toLocaleString()}</span>
+                <span>📏 ${product.distance.toFixed(1)} km</span>
+                <span>⭐ ${product.rating}/5</span>
+                <span>📈 Trend: ${Math.round(product.trend_score * 100)}</span>
+                <span><span class="score-badge">Score: ${(product.final_score * 100).toFixed(1)}</span></span>
+            </div>
+        </div>
+    `).join('');
+}
+
+function selectProduct(productId) {
+    selectedProductId = productId;
+    displayRecommendations();
+    updateMap();
+    updateCharts();
+}
+
+function updateStats(totalAnalyzed) {
+    document.getElementById('totalProducts').textContent = totalAnalyzed;
+    const avgScore = currentRecommendations.length > 0 ?
+        currentRecommendations.reduce((sum, p) => sum + p.final_score, 0) / currentRecommendations.length * 100 : 0;
+    document.getElementById('avgScore').textContent = avgScore.toFixed(1);
+}
+
+// ============================================================================
+// WEB SCRAPING SIMULATION
+// ============================================================================
+async function simulateScrape() {
+    if (scrapedDataMerged) {
+        alert('Scraped data already merged. Refresh page to reset.');
+        return;
+    }
+    
+    const logContainer = document.getElementById('scrapeLogContent');
+    const logSection = document.getElementById('scrapeLog');
+    logSection.style.display = 'block';
+    logContainer.innerHTML = '';
+    
+    const sites = [
+        'competitor-marketplace.com',
+        'b2b-wholesale-hub.com',
+        'industrial-suppliers.net',
+        'trade-direct.in',
+        'bulk-buyers-portal.com'
+    ];
+    
+    // Simulate scraping steps
+    for (let i = 0; i < sites.length; i++) {
+        await sleep(400);
+        addLogLine(`[${new Date().toLocaleTimeString()}] Connecting to ${sites[i]}...`);
+        await sleep(300);
+        addLogLine(`[${new Date().toLocaleTimeString()}] Parsing product listings from ${sites[i]}...`);
+        await sleep(300);
+        addLogLine(`[${new Date().toLocaleTimeString()}] Extracted ${Math.floor(Math.random() * 20 + 10)} products from ${sites[i]}`);
+    }
+    
+    await sleep(500);
+    addLogLine(`[${new Date().toLocaleTimeString()}] ✓ Scraping complete. Merging data...`);
+    await sleep(500);
+    addLogLine(`[${new Date().toLocaleTimeString()}] ✓ Found ${SCRAPED_PRODUCTS.length} price opportunities!`);
+    
+    // Merge scraped data
+    allProducts = [...MOCK_PRODUCTS, ...SCRAPED_PRODUCTS];
+    scrapedDataMerged = true;
+    
+    // Recompute recommendations
+    computeRecommendations();
+    
+    // Highlight opportunities
+    highlightOpportunities();
+}
+
+function addLogLine(text) {
+    const logContainer = document.getElementById('scrapeLogContent');
+    const line = document.createElement('div');
+    line.className = 'log-line';
+    line.textContent = text;
+    logContainer.appendChild(line);
+    logContainer.scrollTop = logContainer.scrollHeight;
+}
+
+function highlightOpportunities() {
+    // Find products where scraped price is lower than local price
+    const opportunities = [];
+    
+    SCRAPED_PRODUCTS.forEach(scrapedProduct => {
+        const localMatch = MOCK_PRODUCTS.find(p => p.name === scrapedProduct.name);
+        if (localMatch && scrapedProduct.price < localMatch.price) {
+            opportunities.push({
+                name: scrapedProduct.name,
+                priceDiff: localMatch.price - scrapedProduct.price,
+                localPrice: localMatch.price,
+                scrapedPrice: scrapedProduct.price
+            });
+        }
+    });
+    
+    if (opportunities.length > 0) {
+        setTimeout(() => {
+            const opportunityText = opportunities.map(o => 
+                `${o.name}: Save ₹${o.priceDiff.toLocaleString()} (Local: ₹${o.localPrice.toLocaleString()}, Online: ₹${o.scrapedPrice.toLocaleString()})`
+            ).join('\n');
+            alert(`💰 Price Opportunities Found!\n\n${opportunityText}`);
+        }, 1000);
+    }
+}
+
+// ============================================================================
+// MAP VISUALIZATION (Leaflet)
+// ============================================================================
+function initializeMap() {
+    map = L.map('map').setView([retailerLocation.lat, retailerLocation.lon], 8);
+    
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '© OpenStreetMap contributors'
+    }).addTo(map);
+    
+    updateMap();
+}
+
+function updateMap() {
+    if (!map) return;
+    
+    // Clear existing markers
+    map.eachLayer(layer => {
+        if (layer instanceof L.Marker) {
+            map.removeLayer(layer);
+        }
+    });
+    
+    // Add retailer location marker
+    const retailerIcon = L.divIcon({
+        className: 'custom-marker',
+        html: '<div style="background: #ff4444; width: 20px; height: 20px; border-radius: 50%; border: 3px solid white; box-shadow: 0 2px 4px rgba(0,0,0,0.3);"></div>',
+        iconSize: [20, 20]
+    });
+    
+    L.marker([retailerLocation.lat, retailerLocation.lon], {icon: retailerIcon})
+        .bindPopup('<strong>📍 Your Location</strong><br>Retailer')
+        .addTo(map);
+    
+    // Add seller markers for top recommendations
+    currentRecommendations.forEach((product, index) => {
+        const color = selectedProductId === product.id ? '#764ba2' : '#667eea';
+        const sellerIcon = L.divIcon({
+            className: 'custom-marker',
+            html: `<div style="background: ${color}; width: 16px; height: 16px; border-radius: 50%; border: 2px solid white; box-shadow: 0 2px 4px rgba(0,0,0,0.3);"></div>`,
+            iconSize: [16, 16]
+        });
+        
+        L.marker([product.seller_lat, product.seller_lon], {icon: sellerIcon})
+            .bindPopup(`
+                <strong>${product.name}</strong><br>
+                ${product.seller_name}<br>
+                Price: ₹${product.price.toLocaleString()}<br>
+                Distance: ${product.distance.toFixed(1)} km<br>
+                Score: ${(product.final_score * 100).toFixed(1)}
+            `)
+            .addTo(map);
+    });
+    
+    // Fit bounds to show all markers
+    if (currentRecommendations.length > 0) {
+        const bounds = L.latLngBounds([
+            [retailerLocation.lat, retailerLocation.lon],
+            ...currentRecommendations.map(p => [p.seller_lat, p.seller_lon])
+        ]);
+        map.fitBounds(bounds, {padding: [50, 50]});
+    }
+}
+
+// ============================================================================
+// CHARTS (Chart.js)
+// ============================================================================
+function initializeCharts() {
+    // Price Distribution Chart
+    const priceCtx = document.getElementById('priceChart').getContext('2d');
+    priceChart = new Chart(priceCtx, {
+        type: 'bar',
+        data: {
+            labels: [],
+            datasets: [{
+                label: 'Number of Products',
+                data: [],
+                backgroundColor: 'rgba(102, 126, 234, 0.7)',
+                borderColor: 'rgba(102, 126, 234, 1)',
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {display: false}
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: {stepSize: 1}
+                }
+            }
+        }
+    });
+    
+    // Trend Timeline Chart
+    const trendCtx = document.getElementById('trendChart').getContext('2d');
+    trendChart = new Chart(trendCtx, {
+        type: 'line',
+        data: {
+            labels: [],
+            datasets: [{
+                label: 'Trend Score',
+                data: [],
+                borderColor: 'rgba(118, 75, 162, 1)',
+                backgroundColor: 'rgba(118, 75, 162, 0.1)',
+                tension: 0.4,
+                fill: true
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {display: false}
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    max: 100
+                }
+            }
+        }
+    });
+}
+
+function updateCharts() {
+    // Update price distribution
+    if (currentRecommendations.length > 0) {
+        const prices = currentRecommendations.map(p => p.price);
+        const minPrice = Math.min(...prices);
+        const maxPrice = Math.max(...prices);
+        const binCount = 5;
+        const binSize = (maxPrice - minPrice) / binCount;
+        
+        const bins = Array(binCount).fill(0);
+        const labels = [];
+        
+        for (let i = 0; i < binCount; i++) {
+            const binStart = minPrice + i * binSize;
+            const binEnd = binStart + binSize;
+            labels.push(`₹${Math.round(binStart/1000)}k-${Math.round(binEnd/1000)}k`);
+            
+            bins[i] = prices.filter(p => p >= binStart && p < binEnd).length;
+        }
+        
+        priceChart.data.labels = labels;
+        priceChart.data.datasets[0].data = bins;
+        priceChart.update();
+    }
+    
+    // Update trend timeline for selected product
+    if (selectedProductId) {
+        const product = currentRecommendations.find(p => p.id === selectedProductId);
+        if (product) {
+            // Generate mock time series data
+            const months = ['6mo ago', '5mo ago', '4mo ago', '3mo ago', '2mo ago', '1mo ago', 'Now'];
+            const baseScore = Math.round(product.trend_score * 100);
+            const trendData = months.map((_, i) => {
+                const variation = (Math.random() - 0.5) * 20;
+                return Math.max(0, Math.min(100, baseScore + variation - (6-i)*2));
+            });
+            trendData[trendData.length - 1] = baseScore; // Current score
+            
+            trendChart.data.labels = months;
+            trendChart.data.datasets[0].data = trendData;
+            trendChart.data.datasets[0].label = `${product.name} - Trend`;
+            trendChart.update();
+        }
+    }
+}
+
+// ============================================================================
+// EXPORT SNAPSHOT
+// ============================================================================
+function exportSnapshot() {
+    const panel = document.getElementById('recommendationsPanel');
+    
+    html2canvas(panel, {
+        backgroundColor: '#ffffff',
+        scale: 2
+    }).then(canvas => {
+        const link = document.createElement('a');
+        link.download = `intellitrade-recommendations-${Date.now()}.png`;
+        link.href = canvas.toDataURL();
+        link.click();
+        
+        alert('✓ Snapshot exported successfully!');
+    });
+}
+</script>
+
+</body>
+</html>
