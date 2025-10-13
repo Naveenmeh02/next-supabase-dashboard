@@ -45,7 +45,11 @@ interface LoginCredentials {
 }
 
 export async function loginWithEmailAndPassword(credentials: { email: string; password: string }) {
-  console.log('Attempting login with email:', credentials.email);
+  // Trim email and password to avoid whitespace issues
+  const email = credentials.email.trim().toLowerCase();
+  const password = credentials.password.trim();
+  
+  console.log('Attempting login with email:', email);
   
   try {
     const supabase = await createServerSupabaseClient();
@@ -58,8 +62,8 @@ export async function loginWithEmailAndPassword(credentials: { email: string; pa
 
     console.log('Calling signInWithPassword...');
     const { data, error } = await supabase.auth.signInWithPassword({
-      email: credentials.email,
-      password: credentials.password,
+      email,
+      password,
     });
 
     console.log('Auth response:', { data, error });
@@ -68,27 +72,41 @@ export async function loginWithEmailAndPassword(credentials: { email: string; pa
       console.error('Login error:', error);
       // Handle specific error cases
       if (error.message.includes('Invalid login credentials')) {
-        return { error: { message: 'Invalid email or password' } };
+        return { error: { message: 'Invalid email or password. Please check your credentials and try again.' } };
       }
-      // Remove email confirmation requirement
       if (error.message.includes('Email not confirmed')) {
-        // Try to sign up the user if email is not confirmed
-        console.log('Email not confirmed, attempting to resend confirmation or create account...');
-        return await signUpWithEmailAndPassword(credentials);
+        return { error: { message: 'Please confirm your email address before logging in.' } };
+      }
+      if (error.message.includes('User not found')) {
+        return { error: { message: 'No account found with this email. Please sign up first.' } };
       }
       return { error: { message: error.message || 'Login failed. Please try again.' } };
     }
 
-    if (data.session) {
-      console.log('Login successful, redirecting to dashboard');
-      // Use a hard redirect to ensure cookies are set
-      redirect('/dashboard');
+    if (data.session && data.user) {
+      console.log('Login successful, checking user role');
+      
+      // Check if user has retailer role in metadata
+      const userRole = data.user.user_metadata?.role;
+      
+      if (userRole === 'retailer') {
+        console.log('Retailer user, redirecting to retailers-dashboard');
+        redirect('/retailers-dashboard');
+      } else {
+        console.log('Non-retailer user, redirecting to dashboard');
+        redirect('/dashboard');
+      }
     }
 
     // If no session but no error, try to get the session
     const { data: { session } } = await supabase.auth.getSession();
     if (session) {
-      redirect('/dashboard');
+      const userRole = session.user.user_metadata?.role;
+      if (userRole === 'retailer') {
+        redirect('/retailers-dashboard');
+      } else {
+        redirect('/dashboard');
+      }
     }
 
     return { 
@@ -110,7 +128,11 @@ interface SignUpCredentials {
 }
 
 export async function signUpWithEmailAndPassword(credentials: { email: string; password: string }) {
-  console.log('Attempting signup with email:', credentials.email);
+  // Trim email and password to avoid whitespace issues
+  const email = credentials.email.trim().toLowerCase();
+  const password = credentials.password.trim();
+  
+  console.log('Attempting signup with email:', email);
   
   try {
     const supabase = await createServerSupabaseClient();
@@ -122,52 +144,74 @@ export async function signUpWithEmailAndPassword(credentials: { email: string; p
 
     // First, try to sign in (in case user already exists)
     const { data: signInData, error: signInError } = await supabase.auth.signInWithPassword({
-      email: credentials.email,
-      password: credentials.password,
+      email,
+      password,
     });
 
-    // If sign in is successful, redirect to dashboard
-    if (signInData?.session) {
-      console.log('Sign in successful, redirecting to dashboard');
-      redirect('/dashboard');
+    // If sign in is successful, redirect based on role
+    if (signInData?.session && signInData.user) {
+      console.log('User already exists, signing in');
+      const userRole = signInData.user.user_metadata?.role;
+      
+      if (userRole === 'retailer') {
+        redirect('/retailers-dashboard');
+      } else {
+        redirect('/dashboard');
+      }
     }
 
-    // If user doesn't exist or password is wrong, try to sign up
+    // If user doesn't exist or password is wrong, try to sign up with retailer role
     const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
-      email: credentials.email,
-      password: credentials.password,
+      email,
+      password,
       options: {
-        emailRedirectTo: `${process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'}/dashboard`,
+        data: {
+          role: 'retailer', // Save retailer role in user metadata
+        },
+        emailRedirectTo: `${process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'}/retailers-dashboard`,
       },
     });
 
     if (signUpError) {
       console.error('Signup error:', signUpError);
+      
+      // Provide specific error messages
+      if (signUpError.message.includes('already registered')) {
+        return { error: { message: 'An account with this email already exists. Please log in instead.' } };
+      }
+      if (signUpError.message.includes('Password should be')) {
+        return { error: { message: 'Password must be at least 6 characters long.' } };
+      }
+      
       return { error: { message: signUpError.message || 'Signup failed. Please try again.' } };
     }
 
-    // If we get here, signup was successful
-    console.log('Signup successful, attempting to sign in...');
+    if (!signUpData.user) {
+      console.error('No user data after signup');
+      return { error: { message: 'Signup failed. Please try again.' } };
+    }
+
+    console.log('Signup successful for user:', signUpData.user.id, 'with role: retailer');
     
     // Try to sign in after successful signup
     const { data: newSignInData, error: newSignInError } = await supabase.auth.signInWithPassword({
-      email: credentials.email,
-      password: credentials.password,
+      email,
+      password,
     });
 
     if (newSignInError) {
       console.error('Auto sign-in after signup failed:', newSignInError);
-      return { error: { message: 'Account created but automatic sign in failed. Please try to sign in manually.' } };
+      return { error: { message: 'Account created successfully! Please log in to continue.' } };
     }
 
-    if (newSignInData.session) {
-      console.log('Auto sign-in successful, redirecting to dashboard');
-      redirect('/dashboard');
+    if (newSignInData.session && newSignInData.user) {
+      console.log('Auto sign-in successful, redirecting to retailers-dashboard');
+      redirect('/retailers-dashboard');
     }
 
     // If we get here, something unexpected happened
     console.error('Unexpected state after signup and sign in attempt');
-    return { error: { message: 'Something went wrong. Please try to sign in manually.' } };
+    return { error: { message: 'Account created successfully! Please log in to continue.' } };
   } catch (error) {
     console.error('Unexpected error during signup:', error);
     return { 

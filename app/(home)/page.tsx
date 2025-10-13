@@ -1,13 +1,8 @@
 import React from "react";
-import { readUserSession } from "@/lib/actions";
-import { redirect } from "next/navigation";
+
 
 export default async function Home() {
-	const { data: userSession } = await readUserSession();
-
-	if (userSession.session) {
-		return redirect("/dashboard");
-	} else {
-		return redirect("/auth");
-	}
+		<h1 className="">This is marketplace page
+			This is will then redirect you to distributors dashboard page
+		</h1>
 }

@@ -55,11 +55,35 @@ export async function middleware(request: NextRequest) {
 	);
 
 	const { data: { session } } = await supabase.auth.getSession();
+	const pathname = request.nextUrl.pathname;
 
-	// Redirect authenticated users from /auth to /dashboard
-	if (session && request.nextUrl.pathname === '/auth') {
-		return NextResponse.redirect(new URL('/dashboard', request.url));
+	// Redirect authenticated users from /auth to their appropriate dashboard
+	if (session && pathname === '/auth') {
+		const userRole = session.user.user_metadata?.role;
+		
+		if (userRole === 'retailer') {
+			return NextResponse.redirect(new URL('/retailers-dashboard', request.url));
+		} else {
+			return NextResponse.redirect(new URL('/dashboard', request.url));
+		}
+	}
+
+	// Protect /retailers-dashboard route - only for authenticated retailers
+	if (pathname.startsWith('/retailers-dashboard')) {
+		if (!session) {
+			return NextResponse.redirect(new URL('/auth', request.url));
+		}
+
+		const userRole = session.user.user_metadata?.role;
+		
+		if (userRole !== 'retailer') {
+			return NextResponse.redirect(new URL('/dashboard', request.url));
+		}
 	}
 
 	return response;
 }
+
+export const config = {
+	matcher: ['/', '/auth', '/dashboard/:path*', '/retailers-dashboard/:path*'],
+};
