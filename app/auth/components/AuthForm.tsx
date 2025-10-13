@@ -92,8 +92,15 @@ export default function AuthForm() {
   return (
     <div className="w-full max-w-md mx-auto p-4">
       <div className="text-center mb-8">
+        <div className="flex justify-center mb-6">
+          <img 
+            src="/intellitrade-logo.png" 
+            alt="IntelliTrade Logo" 
+            className="h-28 w-28 object-contain"
+          />
+        </div>
         <h1 className="text-3xl font-bold mb-2">
-          {mode === 'login' ? 'Welcome back' : 'Create an account'}
+          {mode === 'login' ? 'Welcome back to IntelliTrade' : 'Create an account'}
         </h1>
         <p className="text-muted-foreground">
           {mode === 'login' 

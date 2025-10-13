@@ -66,7 +66,7 @@ const mockOrders = [
 const mockInventory = [
   {
     id: 1,
-    name: 'Product A',
+    name: 'SmartX Wireless Earbuds',
     sku: 'SKU-001',
     category: 'Electronics',
     stock: 45,
@@ -76,7 +76,7 @@ const mockInventory = [
   },
   {
     id: 2,
-    name: 'Product B',
+    name: 'VoltMax Portable Power Bank',
     sku: 'SKU-002',
     category: 'Accessories',
     stock: 12,
@@ -86,7 +86,7 @@ const mockInventory = [
   },
   {
     id: 3,
-    name: 'Product C',
+    name: 'LED Monitor',
     sku: 'SKU-003',
     category: 'Electronics',
     stock: 0,
@@ -96,7 +96,7 @@ const mockInventory = [
   },
   {
     id: 4,
-    name: 'Product D',
+    name: 'Smart Wi-Fi Plug',
     sku: 'SKU-004',
     category: 'Home & Garden',
     stock: 78,

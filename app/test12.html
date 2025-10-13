@@ -81,30 +81,10 @@
             }
         }
         
-        header p {
-            color: #6b7280;
-        }
-        
-        @media (prefers-color-scheme: dark) {
-            header p {
-                color: #9ca3af;
-            }
-        }
-        
         .demo-toggle {
             display: flex;
             align-items: center;
             gap: 10px;
-        }
-        
-        .demo-toggle span {
-            color: #374151;
-        }
-        
-        @media (prefers-color-scheme: dark) {
-            .demo-toggle span {
-                color: #d1d5db;
-            }
         }
         
         .toggle-switch {
@@ -562,9 +542,16 @@ FEATURES DEMONSTRATED:
 
 <div class="container">
     <header>
-        <div>
-            <h1>🚀 IntelliTrade B2B Recommendation System</h1>
-            <p style="font-size: 14px; margin-top: 5px;">Intelligent product recommendations powered by multi-factor analysis</p>
+        <div style="display: flex; align-items: center; gap: 12px;">
+            <img 
+                src="/intellitrade-logo.png" 
+                alt="IntelliTrade Logo" 
+                style="height: 48px; width: 48px; object-fit: contain;"
+            />
+            <div>
+                <h1 style="margin: 0;">IntelliTrade Recommendation System</h1>
+                <p style="color: #6b7280; font-size: 14px; margin: 5px 0 0 0;">Intelligent product recommendations powered by multi-factor analysis</p>
+            </div>
         </div>
         <div class="demo-toggle">
             <span style="font-weight: 600;">Demo Mode</span>

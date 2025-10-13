@@ -8,9 +8,9 @@ import SignOut from './SignOut';
 
 
 const navItems = [
-  { name: 'Overview', href: '/dashboard', icon: Home },
+  { name: 'Home', href: '/dashboard', icon: Home },
   { name: 'Analytics', href: '/dashboard/analytics', icon: LineChart },
-  { name: 'Retailers', href: '/dashboard/retailers', icon: Users },
+  { name: 'My Customers', href: '/dashboard/retailers', icon: Users },
   { name: 'Inventory', href: '/dashboard/inventory', icon: Package },
   { name: 'Settings', href: '/dashboard/settings', icon: Settings },
 ];
@@ -23,7 +23,12 @@ export default function DistributorSidebar() {
       <div className="flex flex-col w-64 border-r border-gray-200 bg-white dark:bg-gray-900 dark:border-gray-800">
         <div className="flex flex-col flex-grow overflow-y-auto">
           {/* Header */}
-          <div className="flex items-center flex-shrink-0 px-6 py-6 border-b border-gray-200 dark:border-gray-800">
+          <div className="flex items-center flex-shrink-0 px-6 py-6 border-b border-gray-200 dark:border-gray-800 gap-3">
+            <img 
+              src="/intellitrade-logo.png" 
+              alt="IntelliTrade Logo" 
+              className="h-10 w-10 object-contain"
+            />
             <h1 className="text-xl font-bold text-gray-900 dark:text-white">Distributor Hub</h1>
           </div>
           
@@ -64,7 +69,7 @@ export default function DistributorSidebar() {
               onClick={() => window.location.href = "http://127.0.0.1:5500/app/test12.html"}
               className="w-full flex items-center justify-center gap-3 px-4 py-3 border-2 border-indigo-200 dark:border-indigo-900 rounded-lg text-indigo-600 dark:text-indigo-400 text-sm font-medium bg-indigo-50 dark:bg-indigo-950/30 transition-all duration-300 ease-in-out hover:bg-indigo-100 hover:text-indigo-700 hover:border-indigo-300 dark:hover:bg-indigo-950/50 dark:hover:text-indigo-300 dark:hover:border-indigo-800"
             >
-              Check Recommendation
+            Recommended for You
             </button>
           </div>
 

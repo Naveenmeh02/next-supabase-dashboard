@@ -135,7 +135,7 @@ export default function AnalyticsPage() {
             </svg>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">1,234</div>
+            <div className="text-2xl font-bold">513</div>
             <p className="text-xs text-muted-foreground">+12% from last period</p>
           </CardContent>
         </Card>
@@ -157,7 +157,7 @@ export default function AnalyticsPage() {
             </svg>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">42</div>
+            <div className="text-2xl font-bold">3</div>
             <p className="text-xs text-muted-foreground">+5 from last month</p>
           </CardContent>
         </Card>
@@ -269,11 +269,11 @@ export default function AnalyticsPage() {
           <CardContent>
             <div className="space-y-4">
               {[
-                { name: 'Product A', sales: 1242, revenue: 12420 },
-                { name: 'Product B', sales: 1103, revenue: 11030 },
-                { name: 'Product C', sales: 984, revenue: 9840 },
-                { name: 'Product D', sales: 876, revenue: 8760 },
-                { name: 'Product E', sales: 754, revenue: 7540 },
+                { name: 'SmartX Wireless Earbuds', sales: 1242, revenue: 12420 },
+                { name: 'VoltMax Portable Power Bank', sales: 1103, revenue: 11030 },
+                { name: 'LED Monitor', sales: 984, revenue: 9840 },
+                { name: 'Smart Wi-Fi Plug', sales: 876, revenue: 8760 },
+                { name: 'TechWave Bluetooth Speaker', sales: 754, revenue: 7540 },
               ].map((product, index) => (
                 <div key={index} className="flex items-center">
                   <div className="flex-1">
